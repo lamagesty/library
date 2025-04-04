@@ -14,6 +14,20 @@ class Rental:
         self.book = book
         self.days_rented = days_rented
 
+    def get_charge(self) -> float:
+        amount = 0
+        if self.book.price_code == Book.REGULAR:
+            amount += 2
+            if self.days_rented > 2:
+                amount += (self.days_rented - 2) * 1.5
+        elif self.book.price_code == Book.NEW_RELEASE:
+            amount += self.days_rented * 3
+        elif self.book.price_code == Book.CHILDREN:
+            amount += 1.5
+            if self.days_rented > 3:
+                amount += (self.days_rented - 3) * 1.5
+        return amount
+
 
 class Client:
 
@@ -24,29 +38,13 @@ class Client:
     def add_rental(self, rental: Rental):
         self.rentals.append(rental)
 
-    def get_charge(self, rental: Rental) -> float:
-        amount = 0
-        if rental.book.price_code == Book.REGULAR:
-            amount += 2
-            if rental.days_rented > 2:
-                amount += (rental.days_rented - 2) * 1.5
-        elif rental.book.price_code == Book.NEW_RELEASE:
-            amount += rental.days_rented * 3
-        elif rental.book.price_code == Book.CHILDREN:
-            amount += 1.5
-            if rental.days_rented > 3:
-                amount += (rental.days_rented - 3) * 1.5
-        return amount
-
     def statement(self) -> str:
-
         total_amount = 0
         frequent_renter_points = 0
         result = f"Rental summary for {self.name}\n"
         
         for rental in self.rentals:
-            # determine amounts for each line (extraído para get_charge)
-            amount = self.get_charge(rental)
+            amount = rental.get_charge()
 
             # add frequent renter points
             frequent_renter_points += 1
@@ -57,7 +55,6 @@ class Client:
             result += f"- {rental.book.title}: {amount}\n"
             total_amount += amount
         
-        # show total result
         result += f"Total: {total_amount}\n"
         result += f"Points: {frequent_renter_points}"
         return result
